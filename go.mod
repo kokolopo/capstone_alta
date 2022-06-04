@@ -1,5 +1,6 @@
 module github.com/kokolopo/capstone_alta
 
+// +heroku goVersion go1.17
 go 1.17
 
 require (
