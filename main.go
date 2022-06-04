@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/kokolopo/capstone_alta/auth"
@@ -24,6 +26,17 @@ func main() {
 
 	router := gin.Default()
 	router.Use(cors.Default())
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://invoiceinaja-test.herokuapp.com"},
+		AllowMethods:     []string{"PUT", "PATCH"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "https://invoiceinaja-test.herokuapp.com/api/v1"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 
 	routes.APIRoutes(router, userHandler, authService, userService)
 
