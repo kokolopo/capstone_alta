@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -53,7 +54,7 @@ func (h *UserHandler) CheckEmailAvailability(c *gin.Context) {
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
 
-		response := helper.ApiResponse("Email checking failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.ApiResponse("Email checking failed", http.StatusUnprocessableEntity, "gagal", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -61,7 +62,7 @@ func (h *UserHandler) CheckEmailAvailability(c *gin.Context) {
 	isEmailAvailable, err := h.userService.IsEmailAvailable(input)
 	if err != nil {
 		errorMessage := gin.H{"errors": "Server error"}
-		response := helper.ApiResponse("Email checking failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.ApiResponse("Email checking failed", http.StatusUnprocessableEntity, "gagal", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -112,4 +113,44 @@ func (h *UserHandler) Login(c *gin.Context) {
 	res := helper.ApiResponse("berhasil login", http.StatusOK, "berhasil", formatter)
 
 	c.JSON(http.StatusCreated, res)
+}
+
+func (h *UserHandler) UploadAvatar(c *gin.Context) {
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		res := helper.ApiResponse("Gagal Mengunggah Gambar!", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	// didapatkan dari JWT
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	path := fmt.Sprintf("images/%d-%s", userId, file.Filename)
+
+	errImage := c.SaveUploadedFile(file, path)
+	if errImage != nil {
+		data := gin.H{"unggahan": false}
+		res := helper.ApiResponse("Gagal Mengunggah Gambar!", http.StatusBadRequest, "gagal", data)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	_, errUser := h.userService.SaveAvatar(userId, path)
+	if errUser != nil {
+		data := gin.H{"unggahan": false}
+		res := helper.ApiResponse("Gagal Mengunggah Gambar!", http.StatusBadRequest, "gagal", data)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	data := gin.H{"unggahan": true}
+	res := helper.ApiResponse("Berhasil Mengunggah Gambar!", http.StatusOK, "berhasil", data)
+
+	c.JSON(http.StatusOK, res)
 }

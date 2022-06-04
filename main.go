@@ -1,14 +1,13 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/kokolopo/capstone_alta/auth"
 	"github.com/kokolopo/capstone_alta/config"
 	"github.com/kokolopo/capstone_alta/database"
 	"github.com/kokolopo/capstone_alta/domain/user"
 	"github.com/kokolopo/capstone_alta/handler"
+	"github.com/kokolopo/capstone_alta/routes"
 )
 
 func main() {
@@ -24,17 +23,7 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "ping-pong",
-		})
-	})
-	api := router.Group("/api/v1")
-
-	// user
-	api.POST("/users", userHandler.UserRegister)
-	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
-	api.POST("/sessions", userHandler.Login)
+	routes.APIRoutes(router, userHandler, authService, userService)
 
 	router.Run()
 

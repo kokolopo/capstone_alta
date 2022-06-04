@@ -65,20 +65,24 @@ func (s *jwtService) ValidateToken(encodedToken string) (*jwt.Token, error) {
 
 func AuthMiddleware(authService Service, userService user.IService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// mendapatkan bearer token dari header
 		authHeader := c.GetHeader("Authorization")
 
+		// cek apakah terdapat bearer token
 		if !strings.Contains(authHeader, "Bearer") {
 			response := helper.ApiResponse("Unauthorized1", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
 
+		// mengambil token jwt
 		tokenString := ""
 		arrayToken := strings.Split(authHeader, " ")
 		if len(arrayToken) == 2 {
 			tokenString = arrayToken[1]
 		}
 
+		// validasi token
 		token, err := authService.ValidateToken(tokenString)
 		if err != nil {
 			response := helper.ApiResponse("Unauthorized2", http.StatusUnauthorized, "error", nil)
