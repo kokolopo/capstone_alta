@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/kokolopo/capstone_alta/auth"
 	"github.com/kokolopo/capstone_alta/config"
@@ -22,6 +23,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
+	router.Use(cors.Default())
 
 	routes.APIRoutes(router, userHandler, authService, userService)
 
