@@ -28,7 +28,7 @@ func main() {
 	router.Use(cors.Default())
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://invoiceinaja-test.herokuapp.com"},
-		AllowMethods:     []string{"PUT", "PATCH"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
