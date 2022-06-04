@@ -26,7 +26,7 @@ func main() {
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
+			"message": "ping-pong",
 		})
 	})
 	api := router.Group("/api/v1")
