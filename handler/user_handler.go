@@ -23,9 +23,11 @@ func (h *UserHandler) UserRegister(c *gin.Context) {
 	var input user.InputRegister
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
-		res := helper.ApiResponse("Input Data Gagal!", http.StatusUnprocessableEntity, "gagal", err)
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
 
-		c.JSON(http.StatusUnprocessableEntity, res)
+		response := helper.ApiResponse("Input Data Gagal!", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
 
@@ -86,8 +88,11 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
-		res := helper.ApiResponse("Login Gagal!", http.StatusUnprocessableEntity, "gagal", nil)
-		c.JSON(http.StatusUnprocessableEntity, res)
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.ApiResponse("Login Gagal!", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
 
@@ -153,4 +158,35 @@ func (h *UserHandler) UploadAvatar(c *gin.Context) {
 	res := helper.ApiResponse("Berhasil Mengunggah Gambar!", http.StatusOK, "berhasil", data)
 
 	c.JSON(http.StatusOK, res)
+}
+
+func (h *UserHandler) UpdateUser(c *gin.Context) {
+	// cek yg akses login
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+
+	var input user.InputUpdate
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.ApiResponse("Gagal Memperbaharui Data", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	updated, errUpdate := h.userService.UpdateUser(userId, input)
+	if errUpdate != nil {
+		res := helper.ApiResponse("Gagal Memperbaharui Data", http.StatusUnprocessableEntity, "gagal", err)
+
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
+	formatter := user.FormatUpdateUser(updated)
+
+	res := helper.ApiResponse("Berhasil Memperbaharui Data", http.StatusCreated, "success", formatter)
+
+	c.JSON(http.StatusCreated, res)
 }

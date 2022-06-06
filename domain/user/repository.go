@@ -48,7 +48,7 @@ func (r *repository) FindByEmail(email string) (User, error) {
 }
 
 func (r *repository) Update(user User) (User, error) {
-	err := r.DB.UpdateColumns(&user).Error
+	err := r.DB.Save(&user).Error
 
 	if err != nil {
 		return user, err

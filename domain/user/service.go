@@ -12,6 +12,7 @@ type IService interface {
 	GetUserById(id int) (User, error)
 	IsEmailAvailable(input InputCheckEmail) (bool, error)
 	SaveAvatar(id int, fileLocation string) (User, error)
+	UpdateUser(id int, input InputUpdate) (User, error)
 }
 
 type service struct {
@@ -34,6 +35,7 @@ func (s *service) Register(input InputRegister) (User, error) {
 	//tangkap nilai dari inputan
 	newUser.Fullname = input.Fullname
 	newUser.Email = input.Email
+	newUser.NoTlpn = input.NoTlpn
 	newUser.BusinessName = input.BusinessName
 	newUser.Password = string(passwordHash)
 	newUser.Role = "user"
@@ -105,6 +107,26 @@ func (s *service) SaveAvatar(id int, fileLocation string) (User, error) {
 	}
 
 	user.Avatar = fileLocation
+
+	updatedUser, err := s.repository.Update(user)
+	if err != nil {
+		return updatedUser, err
+	}
+
+	return updatedUser, nil
+}
+
+func (s *service) UpdateUser(id int, input InputUpdate) (User, error) {
+	user, errUser := s.repository.FindById(id)
+	if errUser != nil {
+		return user, errUser
+	}
+
+	user.ID = id
+	user.Fullname = input.Fullname
+	user.Email = input.Email
+	user.NoTlpn = input.NoTlpn
+	user.BusinessName = input.BusinessName
 
 	updatedUser, errUpdate := s.repository.Update(user)
 	if errUpdate != nil {

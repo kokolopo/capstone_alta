@@ -15,6 +15,7 @@ func APIRoutes(router *gin.Engine, userHandler *handler.UserHandler, authService
 			"message": "ping-pong",
 		})
 	})
+
 	api := router.Group("/api/v1")
 
 	// user
@@ -22,4 +23,5 @@ func APIRoutes(router *gin.Engine, userHandler *handler.UserHandler, authService
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/avatars", auth.AuthMiddleware(authService, userService), userHandler.UploadAvatar)
+	api.PUT("/users", auth.AuthMiddleware(authService, userService), userHandler.UpdateUser)
 }
