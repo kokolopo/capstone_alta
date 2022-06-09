@@ -12,7 +12,7 @@ import (
 func APIRoutes(router *gin.Engine, userHandler *handler.UserHandler, authService auth.Service, userService user.IService) {
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "latif anyink!!!!",
+			"message": "wellcome",
 		})
 	})
 
