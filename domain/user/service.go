@@ -30,6 +30,12 @@ func NewUserService(repository IRepository) *service {
 func (s *service) Register(input InputRegister) (User, error) {
 	var newUser User
 
+	// cek email
+	user, err := s.repository.FindByEmail(input.Email)
+	if user.ID != 0 {
+		return user, err
+	}
+
 	//enkripsi password
 	passwordHash, errHash := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 	if errHash != nil {
@@ -46,7 +52,7 @@ func (s *service) Register(input InputRegister) (User, error) {
 	newUser.Avatar = "images/default_user.png"
 
 	//save data yang sudah dimapping kedalam struct Mahasiswa
-	user, err := s.repository.Save(newUser)
+	user, err = s.repository.Save(newUser)
 	if err != nil {
 		return user, err
 	}

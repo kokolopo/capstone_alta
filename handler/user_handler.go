@@ -31,21 +31,37 @@ func (h *UserHandler) UserRegister(c *gin.Context) {
 		return
 	}
 
-	_, errUser := h.userService.Register(input)
-	if errUser != nil {
-		res := helper.ApiResponse("Input Data Gagal!", http.StatusBadRequest, "gagal", errUser)
-
-		c.JSON(http.StatusBadRequest, res)
+	isEmailAvailable, errAvail := h.userService.IsEmailAvailable(user.InputCheckEmail{Email: input.Email})
+	if errAvail != nil {
+		errorMessage := gin.H{"errors": "Server error"}
+		response := helper.ApiResponse("Email checking failed", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
 
-	data := gin.H{
-		"status": "Berhasil Membuat Akun Baru!",
+	if isEmailAvailable != true {
+		data := gin.H{
+			"status": "Gagal Membuat Akun Baru!",
+		}
+		res := helper.ApiResponse("Email sudah digunakan!", http.StatusBadRequest, "gagal", data)
+		c.JSON(http.StatusBadRequest, res)
+	} else {
+		_, errUser := h.userService.Register(input)
+		if errUser != nil {
+			res := helper.ApiResponse("Input Data Gagal!", http.StatusBadRequest, "gagal", errUser)
+
+			c.JSON(http.StatusBadRequest, res)
+			return
+		}
+
+		data := gin.H{
+			"status": "Berhasil Membuat Akun Baru!",
+		}
+
+		res := helper.ApiResponse("Berhasil Membuat Akun Baru!", http.StatusCreated, "berhasil", data)
+
+		c.JSON(http.StatusCreated, res)
 	}
-
-	res := helper.ApiResponse("Berhasil Membuat Akun Baru!", http.StatusCreated, "berhasil", data)
-
-	c.JSON(http.StatusCreated, res)
 }
 
 func (h *UserHandler) CheckEmailAvailability(c *gin.Context) {
