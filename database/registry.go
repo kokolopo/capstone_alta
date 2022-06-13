@@ -1,6 +1,9 @@
 package database
 
-import "github.com/kokolopo/capstone_alta/domain/user"
+import (
+	"github.com/kokolopo/capstone_alta/domain/client"
+	"github.com/kokolopo/capstone_alta/domain/user"
+)
 
 type Model struct {
 	Model interface{}
@@ -9,5 +12,6 @@ type Model struct {
 func RegisterModel() []Model {
 	return []Model{
 		{Model: user.User{}},
+		{Model: client.Client{}},
 	}
 }
