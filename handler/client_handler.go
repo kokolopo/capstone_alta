@@ -36,19 +36,8 @@ func (h *ClientHandler) AddClient(c *gin.Context) {
 
 	// // didapatkan dari JWT
 	currentUser := c.MustGet("currentUser").(user.User)
-	userRole := currentUser.Role
 
-	// cek role user
-	if userRole != "admin" {
-		//errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": "bukan admin"}
-
-		response := helper.ApiResponse("Terbatas. Hanya Untuk Admin", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	_, errClient := h.clientService.AddClient(input)
+	_, errClient := h.clientService.AddClient(currentUser.ID, input)
 	if errClient != nil {
 		errors := helper.FormatValidationError(errClient)
 		errorMessage := gin.H{"errors": errors}

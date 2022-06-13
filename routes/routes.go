@@ -20,7 +20,7 @@ func APIRoutes(router *gin.Engine, userHandler *handler.UserHandler, clientHandl
 
 	// user
 	api.POST("/users", userHandler.UserRegister)
-	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
+	//api.POST("/email_checkers", userHandler.CheckEmailAvailability)
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/avatars", auth.AuthMiddleware(authService, userService), userHandler.UploadAvatar)
 	api.PUT("/users", auth.AuthMiddleware(authService, userService), userHandler.UpdateUser)

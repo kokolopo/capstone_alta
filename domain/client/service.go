@@ -1,7 +1,7 @@
 package client
 
 type IService interface {
-	AddClient(input InputAddClient) (Client, error)
+	AddClient(userID int, input InputAddClient) (Client, error)
 }
 
 type service struct {
@@ -12,7 +12,7 @@ func NewUserService(repository IRepository) *service {
 	return &service{repository}
 }
 
-func (s *service) AddClient(input InputAddClient) (Client, error) {
+func (s *service) AddClient(userID int, input InputAddClient) (Client, error) {
 	var data Client
 
 	data.Fullname = input.Fullname
@@ -21,6 +21,7 @@ func (s *service) AddClient(input InputAddClient) (Client, error) {
 	data.City = input.City
 	data.ZipCode = input.ZipCode
 	data.Company = input.Company
+	data.UserID = userID
 
 	client, err := s.repository.Save(data)
 	if err != nil {
