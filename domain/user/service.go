@@ -2,7 +2,10 @@ package user
 
 import (
 	"errors"
+	"log"
 
+	utl "github.com/kokolopo/capstone_alta/utils"
+	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -13,6 +16,7 @@ type IService interface {
 	IsEmailAvailable(input InputCheckEmail) (bool, error)
 	SaveAvatar(id int, fileLocation string) (User, error)
 	UpdateUser(id int, input InputUpdate) (User, error)
+	ResetPassword(input InputCheckEmail) (User, error)
 }
 
 type service struct {
@@ -134,4 +138,37 @@ func (s *service) UpdateUser(id int, input InputUpdate) (User, error) {
 	}
 
 	return updatedUser, nil
+}
+
+func (s *service) ResetPassword(input InputCheckEmail) (User, error) {
+	email := input.Email
+
+	// cek apakah terdapat data user dengan email tersebut
+	user, err := s.repository.FindByEmail(email)
+	if err != nil {
+		return user, err
+	}
+	if user.ID == 0 {
+		return user, err
+	}
+
+	// generate password
+	res, err := password.Generate(10, 7, 3, false, false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//enkripsi password
+	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(res), bcrypt.MinCost)
+
+	user.Password = string(passwordHash)
+
+	updatePass, errPass := s.repository.Update(user)
+	if errPass != nil {
+		return user, err
+	} else {
+		utl.SendMail(email, res)
+	}
+
+	return updatePass, nil
 }

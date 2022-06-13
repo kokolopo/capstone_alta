@@ -24,4 +24,5 @@ func APIRoutes(router *gin.Engine, userHandler *handler.UserHandler, authService
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/avatars", auth.AuthMiddleware(authService, userService), userHandler.UploadAvatar)
 	api.PUT("/users", auth.AuthMiddleware(authService, userService), userHandler.UpdateUser)
+	api.POST("/reset_passwords", userHandler.ResetPassword)
 }

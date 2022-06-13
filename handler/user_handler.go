@@ -190,3 +190,38 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, res)
 }
+
+func (h *UserHandler) ResetPassword(c *gin.Context) {
+	var input user.InputCheckEmail
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		res := helper.ApiResponse("Something Wrong!!!", http.StatusUnprocessableEntity, "failed", err)
+
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
+	_, errData := h.userService.IsEmailAvailable(input)
+	if errData != nil {
+		res := helper.ApiResponse("Something Wrong!!!", http.StatusBadRequest, "failed", errData)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	_, errUser := h.userService.ResetPassword(input)
+	if errUser != nil {
+		res := helper.ApiResponse("Something Wrong!!!", http.StatusBadRequest, "failed", errUser)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	data := gin.H{
+		"is_sent": true,
+	}
+
+	res := helper.ApiResponse("Please Check Your Email", http.StatusOK, "success", data)
+
+	c.JSON(http.StatusCreated, res)
+}
