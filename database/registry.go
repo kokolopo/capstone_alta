@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/kokolopo/capstone_alta/domain/client"
+	"github.com/kokolopo/capstone_alta/domain/invoice"
 	"github.com/kokolopo/capstone_alta/domain/user"
 )
 
@@ -13,5 +14,7 @@ func RegisterModel() []Model {
 	return []Model{
 		{Model: user.User{}},
 		{Model: client.Client{}},
+		{Model: invoice.Invoice{}},
+		{Model: invoice.DetailInvoice{}},
 	}
 }
