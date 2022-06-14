@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type IRepository interface {
 	Save(client Client) (Client, error)
+	FindAll(userID int) ([]Client, error)
 	FindById(id int) (Client, error)
 	FindByEmail(email string) (Client, error)
 	Update(client Client) (Client, error)
@@ -24,6 +25,16 @@ func (r *repository) Save(client Client) (Client, error) {
 	}
 
 	return client, nil
+}
+
+func (r *repository) FindAll(userID int) ([]Client, error) {
+	var clients []Client
+	err := r.DB.Where("user_id = ?", userID).Find(&clients).Error
+	if err != nil {
+		return clients, err
+	}
+
+	return clients, nil
 }
 
 func (r *repository) FindById(id int) (Client, error) {

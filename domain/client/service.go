@@ -2,6 +2,7 @@ package client
 
 type IService interface {
 	AddClient(userID int, input InputAddClient) (Client, error)
+	GetAll(userID int) ([]Client, error)
 }
 
 type service struct {
@@ -29,4 +30,13 @@ func (s *service) AddClient(userID int, input InputAddClient) (Client, error) {
 	}
 
 	return client, nil
+}
+
+func (s *service) GetAll(userID int) ([]Client, error) {
+	clients, err := s.repository.FindAll(userID)
+	if err != nil {
+		return clients, err
+	}
+
+	return clients, nil
 }

@@ -55,3 +55,22 @@ func (h *ClientHandler) AddClient(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, res)
 }
+
+func (h *ClientHandler) GetClients(c *gin.Context) {
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	clients, err := h.clientService.GetAll(currentUser.ID)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.ApiResponse("Gagal mendapatkan data Clients!", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := client.FormatClients(clients)
+	res := helper.ApiResponse("Berhasil mendapatkan data Clients!", http.StatusOK, "berhasil", formatter)
+
+	c.JSON(http.StatusOK, res)
+}
