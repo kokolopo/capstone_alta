@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kokolopo/capstone_alta/auth"
@@ -73,4 +75,61 @@ func (h *ClientHandler) GetClients(c *gin.Context) {
 	res := helper.ApiResponse("Berhasil mendapatkan data Clients!", http.StatusOK, "berhasil", formatter)
 
 	c.JSON(http.StatusOK, res)
+}
+
+func (h *ClientHandler) DeleteClient(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	// cek apakah yg akses adalah admin
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	client, err := h.clientService.GetByID(id)
+	if err != nil {
+		res := helper.ApiResponse("Item Not Found", http.StatusBadRequest, "failed", err)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	if client.ID == 0 {
+		res := helper.ApiResponse("User Not Found", http.StatusBadRequest, "failed", err)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	if currentUser.ID != client.UserID {
+		res := helper.ApiResponse("Failed to Delete Client", http.StatusBadRequest, "failed", errors.New("kamu bukan tidak berhak"))
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	_, errDel := h.clientService.DeleteClient(client.ID)
+	if errDel != nil {
+		res := helper.ApiResponse("User Not Found", http.StatusBadRequest, "failed", errDel)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	cekItem, errCek := h.clientService.GetByID(id)
+	if errCek != nil {
+		res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", errCek)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	if cekItem.ID == 0 {
+		res := helper.ApiResponse("Successfuly Delete Item", http.StatusOK, "success", nil)
+
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	data := gin.H{"is_deleted": true}
+	res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", data)
+
+	c.JSON(http.StatusCreated, res)
 }

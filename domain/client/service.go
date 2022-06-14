@@ -2,7 +2,9 @@ package client
 
 type IService interface {
 	AddClient(userID int, input InputAddClient) (Client, error)
-	GetAll(userID int) ([]Client, error)
+	GetAll(clientID int) ([]Client, error)
+	GetByID(clientID int) (Client, error)
+	DeleteClient(clientID int) (Client, error)
 }
 
 type service struct {
@@ -32,11 +34,34 @@ func (s *service) AddClient(userID int, input InputAddClient) (Client, error) {
 	return client, nil
 }
 
-func (s *service) GetAll(userID int) ([]Client, error) {
-	clients, err := s.repository.FindAll(userID)
+func (s *service) GetAll(clientID int) ([]Client, error) {
+	clients, err := s.repository.FindAll(clientID)
 	if err != nil {
 		return clients, err
 	}
 
 	return clients, nil
+}
+
+func (s *service) GetByID(clientID int) (Client, error) {
+	client, err := s.repository.FindById(clientID)
+	if err != nil {
+		return client, err
+	}
+
+	return client, nil
+}
+
+func (s *service) DeleteClient(clientID int) (Client, error) {
+	client, err := s.repository.FindById(clientID)
+	if err != nil {
+		return client, err
+	}
+
+	deleteClient, errDel := s.repository.Delete(client)
+	if errDel != nil {
+		return deleteClient, errDel
+	}
+
+	return deleteClient, nil
 }
