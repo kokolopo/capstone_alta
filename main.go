@@ -6,6 +6,8 @@ import (
 	"github.com/kokolopo/capstone_alta/config"
 	"github.com/kokolopo/capstone_alta/database"
 	"github.com/kokolopo/capstone_alta/domain/client"
+
+	"github.com/kokolopo/capstone_alta/domain/invoice"
 	"github.com/kokolopo/capstone_alta/domain/user"
 	"github.com/kokolopo/capstone_alta/handler"
 	"github.com/kokolopo/capstone_alta/routes"
@@ -26,6 +28,10 @@ func main() {
 	clientService := client.NewUserService(clientRepo)
 	clientHandler := handler.NewClientHandler(clientService, userService, authService)
 
+	invoiceRepo := invoice.NewInvoiceRepository(db)
+	invoiceService := invoice.NewUserService(invoiceRepo)
+	invoiceHandler := handler.NewInvoiceHandler(invoiceService, clientService, authService)
+
 	router := gin.Default()
 
 	router.Use(auth.CORSMiddleware())
@@ -35,6 +41,7 @@ func main() {
 		router,
 		userHandler,
 		clientHandler,
+		invoiceHandler,
 		authService,
 		userService,
 	)

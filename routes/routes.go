@@ -9,7 +9,7 @@ import (
 	"github.com/kokolopo/capstone_alta/handler"
 )
 
-func APIRoutes(router *gin.Engine, userHandler *handler.UserHandler, clientHandler *handler.ClientHandler, authService auth.Service, userService user.IService) {
+func APIRoutes(router *gin.Engine, userHandler *handler.UserHandler, clientHandler *handler.ClientHandler, invoiceHandler *handler.InvoiceHandler, authService auth.Service, userService user.IService) {
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "wellcome",
@@ -32,5 +32,5 @@ func APIRoutes(router *gin.Engine, userHandler *handler.UserHandler, clientHandl
 	api.DELETE("/clients/:id", auth.AuthMiddleware(authService, userService), clientHandler.DeleteClient)
 
 	// invoice
-	// api.POST("/invoices", auth.AuthMiddleware(authService, userService), invoiceHandler.AddInvoice)
+	api.POST("/invoices", auth.AuthMiddleware(authService, userService), invoiceHandler.AddInvoice)
 }
