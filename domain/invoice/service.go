@@ -23,6 +23,7 @@ func (s *service) AddInvoice(input InputAddInvoice) (Invoice, error) {
 	invoiceData.TotalAmount = input.Invoice.TotalAmount
 	invoiceData.InvoiceDate = input.Invoice.InvoiceDate
 	invoiceData.InvoiceDue = input.Invoice.InvoiceDue
+	invoiceData.Status = "UNPAID"
 
 	invoice, errInvoice := s.repository.Save(invoiceData)
 	if errInvoice != nil {

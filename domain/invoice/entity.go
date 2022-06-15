@@ -12,6 +12,7 @@ type Invoice struct {
 	Client      client.Client `gorm:"foreignKey:ClientID;not null"`
 	TotalAmount int           `gorm:"type:int(100);not null"`
 	PaymentURL  string        `gorm:"type:varchar(100);not null"`
+	Status      string        `gorm:"type:varchar(100);not null"`
 	InvoiceDate string
 	InvoiceDue  string
 }
