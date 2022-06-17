@@ -29,7 +29,7 @@ func (h *InvoiceHandler) AddInvoice(c *gin.Context) {
 	// tangkap input body
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
-		res := helper.ApiResponse("New Data Has Been Failed1", http.StatusUnprocessableEntity, "failed", err)
+		res := helper.ApiResponse("New Data Has Been Failed1", http.StatusUnprocessableEntity, "failed", nil, err)
 
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
@@ -38,19 +38,19 @@ func (h *InvoiceHandler) AddInvoice(c *gin.Context) {
 	// cek id client relate dengan user'
 	client, errClient := h.clientService.GetByID(input.Invoice.ClientID)
 	if errClient != nil {
-		res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", errClient)
+		res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", nil, errClient)
 
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 	if client.UserID == 0 {
-		res := helper.ApiResponse("client g ada!", http.StatusUnprocessableEntity, "failed", errClient)
+		res := helper.ApiResponse("client g ada!", http.StatusUnprocessableEntity, "failed", nil, errClient)
 
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
 	if client.UserID != currentUser.ID {
-		res := helper.ApiResponse("ini bukan client anda!", http.StatusUnprocessableEntity, "failed", errClient)
+		res := helper.ApiResponse("ini bukan client anda!", http.StatusUnprocessableEntity, "failed", nil, errClient)
 
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
@@ -58,7 +58,7 @@ func (h *InvoiceHandler) AddInvoice(c *gin.Context) {
 		// record data invoice
 		newInvoice, errOrder := h.invoiceService.AddInvoice(input)
 		if errOrder != nil {
-			res := helper.ApiResponse("Invoice Has Been Failed", http.StatusBadRequest, "failed", errOrder)
+			res := helper.ApiResponse("Invoice Has Been Failed", http.StatusBadRequest, "failed", nil, errOrder)
 
 			c.JSON(http.StatusBadRequest, res)
 		}
@@ -66,13 +66,13 @@ func (h *InvoiceHandler) AddInvoice(c *gin.Context) {
 		// record data detail order
 		_, errDetails := h.invoiceService.SaveDetail(newInvoice.ID, input)
 		if errDetails != nil {
-			res := helper.ApiResponse("New Data Has Been Failed", http.StatusBadRequest, "failed", errDetails)
+			res := helper.ApiResponse("New Data Has Been Failed", http.StatusBadRequest, "failed", nil, errDetails)
 
 			c.JSON(http.StatusBadRequest, res)
 		}
 
 		data := gin.H{"is_recorded": true}
-		res := helper.ApiResponse("Order Has Been Created", http.StatusCreated, "success", data)
+		res := helper.ApiResponse("Order Has Been Created", http.StatusCreated, "success", nil, data)
 
 		c.JSON(http.StatusCreated, res)
 	}
@@ -85,13 +85,13 @@ func (h *InvoiceHandler) GetInvoices(c *gin.Context) {
 
 	invoices, err := h.invoiceService.GetInvoices(currentUser.ID)
 	if err != nil {
-		res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", err)
+		res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", nil, err)
 
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	formatter := invoice.FormatInvoices(invoices)
-	res := helper.ApiResponse("invoices", http.StatusCreated, "success", formatter)
+	res := helper.ApiResponse("invoices", http.StatusCreated, "success", nil, formatter)
 	c.JSON(http.StatusCreated, res)
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -31,7 +32,7 @@ func (h *ClientHandler) AddClient(c *gin.Context) {
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
 
-		response := helper.ApiResponse("Login Gagal!", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.ApiResponse("Login Gagal!", http.StatusUnprocessableEntity, "error", nil, errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -44,7 +45,7 @@ func (h *ClientHandler) AddClient(c *gin.Context) {
 		errors := helper.FormatValidationError(errClient)
 		errorMessage := gin.H{"errors": errors}
 
-		response := helper.ApiResponse("Menambahkan Client Baru Gagal!", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.ApiResponse("Menambahkan Client Baru Gagal!", http.StatusUnprocessableEntity, "error", nil, errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -53,26 +54,39 @@ func (h *ClientHandler) AddClient(c *gin.Context) {
 		"status": "Berhasil Menambahkan Client Baru!",
 	}
 
-	res := helper.ApiResponse("Berhasil Membuat client Baru!", http.StatusCreated, "berhasil", data)
+	res := helper.ApiResponse("Berhasil Membuat client Baru!", http.StatusCreated, "berhasil", nil, data)
 
 	c.JSON(http.StatusCreated, res)
 }
 
 func (h *ClientHandler) GetClients(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	currentUser := c.MustGet("currentUser").(user.User)
 
-	clients, err := h.clientService.GetAll(currentUser.ID)
+	clients, total, perPage, err := h.clientService.GetAll(currentUser.ID, page)
 	if err != nil {
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
 
-		response := helper.ApiResponse("Gagal mendapatkan data Clients!", http.StatusBadRequest, "error", errorMessage)
+		response := helper.ApiResponse("Gagal mendapatkan data Clients!", http.StatusBadRequest, "error", nil, errorMessage)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
+	var lastPage float64
+	if total%5 >= 1 && total%5 <= 4 {
+		lastPage = math.Ceil(float64(total/perPage)) + 1
+	} else {
+		lastPage = math.Ceil(float64(total / perPage))
+	}
+
+	info := gin.H{
+		"total":     total,
+		"page":      page,
+		"last_page": lastPage,
+	}
 	formatter := client.FormatClients(clients)
-	res := helper.ApiResponse("Berhasil mendapatkan data Clients!", http.StatusOK, "berhasil", formatter)
+	res := helper.ApiResponse("Berhasil mendapatkan data Clients!", http.StatusOK, "berhasil", info, formatter)
 
 	c.JSON(http.StatusOK, res)
 }
@@ -85,21 +99,21 @@ func (h *ClientHandler) DeleteClient(c *gin.Context) {
 
 	client, err := h.clientService.GetByID(id)
 	if err != nil {
-		res := helper.ApiResponse("Item Not Found", http.StatusBadRequest, "failed", err)
+		res := helper.ApiResponse("Item Not Found", http.StatusBadRequest, "failed", nil, err)
 
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	if client.ID == 0 {
-		res := helper.ApiResponse("User Not Found", http.StatusBadRequest, "failed", err)
+		res := helper.ApiResponse("User Not Found", http.StatusBadRequest, "failed", nil, err)
 
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	if currentUser.ID != client.UserID {
-		res := helper.ApiResponse("Failed to Delete Client", http.StatusBadRequest, "failed", errors.New("kamu bukan tidak berhak"))
+		res := helper.ApiResponse("Failed to Delete Client", http.StatusBadRequest, "failed", nil, errors.New("kamu bukan tidak berhak"))
 
 		c.JSON(http.StatusBadRequest, res)
 		return
@@ -107,7 +121,7 @@ func (h *ClientHandler) DeleteClient(c *gin.Context) {
 
 	_, errDel := h.clientService.DeleteClient(client.ID)
 	if errDel != nil {
-		res := helper.ApiResponse("User Not Found", http.StatusBadRequest, "failed", errDel)
+		res := helper.ApiResponse("User Not Found", http.StatusBadRequest, "failed", nil, errDel)
 
 		c.JSON(http.StatusBadRequest, res)
 		return
@@ -115,21 +129,21 @@ func (h *ClientHandler) DeleteClient(c *gin.Context) {
 
 	cekItem, errCek := h.clientService.GetByID(id)
 	if errCek != nil {
-		res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", errCek)
+		res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", nil, errCek)
 
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	if cekItem.ID == 0 {
-		res := helper.ApiResponse("Successfuly Delete Item", http.StatusOK, "success", nil)
+		res := helper.ApiResponse("Successfuly Delete Item", http.StatusOK, "success", nil, nil)
 
 		c.JSON(http.StatusOK, res)
 		return
 	}
 
 	data := gin.H{"is_deleted": true}
-	res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", data)
+	res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", nil, data)
 
 	c.JSON(http.StatusCreated, res)
 }

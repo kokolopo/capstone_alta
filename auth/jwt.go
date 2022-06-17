@@ -70,7 +70,7 @@ func AuthMiddleware(authService Service, userService user.IService) gin.HandlerF
 
 		// cek apakah terdapat bearer token
 		if !strings.Contains(authHeader, "Bearer") {
-			response := helper.ApiResponse("Unauthorized1", http.StatusUnauthorized, "error", nil)
+			response := helper.ApiResponse("Unauthorized1", http.StatusUnauthorized, "error", nil, nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
@@ -85,7 +85,7 @@ func AuthMiddleware(authService Service, userService user.IService) gin.HandlerF
 		// validasi token
 		token, err := authService.ValidateToken(tokenString)
 		if err != nil {
-			response := helper.ApiResponse("Unauthorized2", http.StatusUnauthorized, "error", nil)
+			response := helper.ApiResponse("Unauthorized2", http.StatusUnauthorized, "error", nil, nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
@@ -93,7 +93,7 @@ func AuthMiddleware(authService Service, userService user.IService) gin.HandlerF
 		claim, ok := token.Claims.(jwt.MapClaims)
 
 		if !ok || !token.Valid {
-			response := helper.ApiResponse("Unauthorized3", http.StatusUnauthorized, "error", nil)
+			response := helper.ApiResponse("Unauthorized3", http.StatusUnauthorized, "error", nil, nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
@@ -102,7 +102,7 @@ func AuthMiddleware(authService Service, userService user.IService) gin.HandlerF
 
 		user, err := userService.GetUserById(userID)
 		if err != nil {
-			response := helper.ApiResponse("Unauthorized4", http.StatusUnauthorized, "error", nil)
+			response := helper.ApiResponse("Unauthorized4", http.StatusUnauthorized, "error", nil, nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}

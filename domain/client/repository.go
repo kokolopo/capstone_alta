@@ -1,10 +1,15 @@
 package client
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+	"strconv"
+
+	"gorm.io/gorm"
+)
 
 type IRepository interface {
 	Save(client Client) (Client, error)
-	FindAll(userID int) ([]Client, error)
+	FindAll(userID int, page, perPage int) ([]Client, int, error)
 	FindById(id int) (Client, error)
 	FindByEmail(email string) (Client, error)
 	Update(client Client) (Client, error)
@@ -28,14 +33,25 @@ func (r *repository) Save(client Client) (Client, error) {
 	return client, nil
 }
 
-func (r *repository) FindAll(userID int) ([]Client, error) {
+func (r *repository) FindAll(userID int, page, perPage int) ([]Client, int, error) {
+	//page, _ := strconv.Atoi(c.Query("page", "1"))
+	//perPage := 9
+	//var total int64
 	var clients []Client
-	err := r.DB.Where("user_id = ?", userID).Find(&clients).Error
+	var total int64
+
+	sql := "SELECT * FROM clients WHERE user_id = " + strconv.Itoa(userID)
+
+	r.DB.Raw(sql).Count(&total)
+
+	sql = fmt.Sprintf("%s LIMIT %d OFFSET %d", sql, perPage, (page-1)*perPage)
+
+	err := r.DB.Raw(sql).Scan(&clients).Error
 	if err != nil {
-		return clients, err
+		return clients, 0, err
 	}
 
-	return clients, nil
+	return clients, int(total), nil
 }
 
 func (r *repository) FindById(id int) (Client, error) {
