@@ -1,11 +1,13 @@
 package invoice
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type IRepository interface {
 	Save(invoice Invoice) (Invoice, error)
 	SaveDetail(detail []DetailInvoice) ([]DetailInvoice, error)
-	// FindAll(userID int) ([]Invoice, error)
+	FindAll(userID int) ([]Invoice, error)
 	// FindById(id int) (Invoice, error)
 	// FindByEmail(email string) (Invoice, error)
 	// Update(invoice Invoice) (Invoice, error)
@@ -36,4 +38,21 @@ func (r *repository) SaveDetail(detail []DetailInvoice) ([]DetailInvoice, error)
 	}
 
 	return detail, nil
+}
+
+func (r *repository) FindAll(userID int) ([]Invoice, error) {
+	var invoices []Invoice
+	var invoicesByUser []Invoice
+	err := r.DB.Preload("Client").Find(&invoices).Error
+	if err != nil {
+		return invoices, err
+	}
+
+	for _, v := range invoices {
+		if v.Client.UserID == userID {
+			invoicesByUser = append(invoicesByUser, v)
+		}
+	}
+
+	return invoicesByUser, nil
 }

@@ -78,3 +78,20 @@ func (h *InvoiceHandler) AddInvoice(c *gin.Context) {
 	}
 
 }
+
+func (h *InvoiceHandler) GetInvoices(c *gin.Context) {
+	// didapatkan dari JWT
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	invoices, err := h.invoiceService.GetInvoices(currentUser.ID)
+	if err != nil {
+		res := helper.ApiResponse("Any Error", http.StatusBadRequest, "failed", err)
+
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	formatter := invoice.FormatInvoices(invoices)
+	res := helper.ApiResponse("invoices", http.StatusCreated, "success", formatter)
+	c.JSON(http.StatusCreated, res)
+}

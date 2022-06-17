@@ -3,6 +3,7 @@ package invoice
 type IService interface {
 	AddInvoice(input InputAddInvoice) (Invoice, error)
 	SaveDetail(invoiceID int, input InputAddInvoice) ([]DetailInvoice, error)
+	GetInvoices(userID int) ([]Invoice, error)
 	// GetAll(clientID int) ([]Client, error)
 	// GetByID(clientID int) (Client, error)
 	// DeleteClient(clientID int) (Client, error)
@@ -47,4 +48,13 @@ func (s *service) SaveDetail(invoiceID int, input InputAddInvoice) ([]DetailInvo
 	}
 
 	return newDetail, nil
+}
+
+func (s *service) GetInvoices(userID int) ([]Invoice, error) {
+	clients, err := s.repository.FindAll(userID)
+	if err != nil {
+		return clients, err
+	}
+
+	return clients, nil
 }
